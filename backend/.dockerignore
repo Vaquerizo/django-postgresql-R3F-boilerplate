@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Entornos
+.venv
+venv/
+
+# Secrets y env
+.env
+
+# Logs y DB locales
+*.log
+db.sqlite3
+
+# Archivos estáticos/medios que no deben entrar en la imagen
+staticfiles/
+media/

@@ -1,0 +1,15 @@
+# Git
+.git
+.gitignore
+
+# Logs y temporales globales
+*.log
+*.tmp
+
+# Entornos locales
+.venv
+venv/
+.env
+
+# Node modules en la raíz (si existieran)
+node_modules

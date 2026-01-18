@@ -1,0 +1,76 @@
+{
+  "name": "LSQ DevContainer",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+
+  "workspaceFolder": "/workspace",
+  "remoteUser": "root",
+
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2.4.5": {
+      "installZsh": "true",
+      "upgradePackages": "true",
+      "uid": "1000",
+      "gid": "1000",
+      "installOhMyZsh": "true",
+      "nonFreePackages": "true"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "enableNonRootDocker": "true",
+      "moby": "true"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11.7",
+      "installTools": true
+    }
+  },
+
+  "containerEnv": {
+    "AWS_PROFILE": "dev",
+    "PYTHONPATH": "${containerWorkspaceFolder}/backend"
+  },
+
+  "remoteEnv": {
+    "PYTHONPATH": "${containerWorkspaceFolder}/backend"
+  },
+
+  "forwardPorts": [8000, 5173, 5432, 6379, 8080],
+
+  "portsAttributes": {
+    "8000": { "label": "Django Dev Server" },
+    "5173": { "label": "Vite Frontend" },
+    "8080": { "label": "Nginx" },
+    "5432": { "label": "PostgreSQL" },
+    "6379": { "label": "Redis" }
+  },
+
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "source=${localEnv:USERPROFILE}\\.aws,target=/root/.aws,type=bind"
+  ],
+
+  "postCreateCommand": ".devcontainer/setup.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "batisteo.vscode-django",
+        "ms-azuretools.vscode-docker",
+        "mrorz.language-gettext",
+        "ecmel.vscode-html-css",
+        "bradlc.vscode-tailwindcss",
+        "AmazonWebServices.aws-toolkit-vscode",
+        "amazonwebservices.amazon-q-vscode",
+        "mkxml.vscode-filesize",
+        "stxr.iconfont-preview",
+        "josee9988.minifyall"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.analysis.typeCheckingMode": "basic"
+      }
+    }
+  }
+}

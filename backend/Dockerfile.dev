@@ -1,0 +1,22 @@
+FROM python:3.11.7-slim-bullseye
+
+# Evita que Python genere archivos .pyc y use buffer
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Directorio de trabajo
+WORKDIR /code
+
+# instala librerias minimas del sistema para windows
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copia y instala dependencias de Python
+COPY requirements.txt /code/
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# Expone el puerto 8000 para Django
+EXPOSE 8000

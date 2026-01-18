@@ -1,0 +1,208 @@
+services:
+
+  # PostgreSQL
+  postgres:
+    profiles: ["dev", "prod"]
+    image: postgres:16-alpine
+    container_name: ${PROJECT_NAME}_postgres
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  web:
+    profiles: ["dev"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+      args:
+        BUILD_ENV: dev
+    container_name: ${PROJECT_NAME}_web
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/code
+    ports:
+      - "8000:8000"
+      - "5678:5678"
+    networks:
+      - app_network
+    
+    command: ["sh", "-c", "sleep infinity"]
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  web_prod:
+    profiles: ["prod"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+      args:
+        BUILD_ENV: prod
+    container_name: ${PROJECT_NAME}_web_prod
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    volumes:
+      - web_static_data:/app/public/static
+      - web_media_data:/app/public/media
+    networks:
+      - app_network
+    restart: unless-stopped
+    command: ["/start"]
+
+  frontend: # React + Vite + R3F
+    profiles: ["dev"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+      args:
+        BUILD_ENV: dev
+    container_name: ${PROJECT_NAME}_frontend
+    depends_on:
+      - web
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "5173:5173"
+    networks:
+      - app_network
+    command: ["npm", "run", "dev", "--", "--host"]
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  frontend_prod: # React + Vite + R3F
+    profiles: ["prod"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        BUILD_ENV: prod
+    container_name: ${PROJECT_NAME}_frontend_prod
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  # # Celery Worker
+  # celery:
+  #   profiles: ["dev"]
+  #   build:
+  #     context: .
+  #     dockerfile: compose/django/Dockerfile
+  #     args:
+  #       BUILD_ENV: dev
+  #   container_name: ${PROJECT_NAME}_celery
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - postgres
+  #     - web
+  #   volumes:
+  #     - ./app:/app/app
+  #   networks:
+  #     - app_network
+  #   restart: unless-stopped
+  #   command: ["/start-celeryworker"]
+
+  # celery_prod:
+  #   profiles: ["prod"]
+  #   build:
+  #     context: .
+  #     dockerfile: compose/django/Dockerfile
+  #     args:
+  #       BUILD_ENV: prod
+  #   container_name: ${PROJECT_NAME}_celery_prod
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - postgres
+  #     - web_prod
+  #   networks:
+  #     - app_network
+  #   restart: unless-stopped
+  #   command: ["/start-celeryworker"]
+
+  # # Celery Beat Scheduler
+  # celery_beat:
+  #   profiles: ["dev"]
+  #   build:
+  #     context: .
+  #     dockerfile: compose/django/Dockerfile
+  #     args:
+  #       BUILD_ENV: dev
+  #   container_name: ${PROJECT_NAME}_celery_beat
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - postgres
+  #     - web
+  #   volumes:
+  #     - ./app:/app/app
+  #   networks:
+  #     - app_network
+  #   restart: unless-stopped
+  #   command: ["/start-celerybeat"]
+
+  # celery_beat_prod:
+  #   profiles: ["prod"]
+  #   build:
+  #     context: .
+  #     dockerfile: compose/django/Dockerfile
+  #     args:
+  #       BUILD_ENV: prod
+  #   container_name: ${PROJECT_NAME}_celery_beat_prod
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - postgres
+  #     - web_prod
+  #   networks:
+  #     - app_network
+  #   restart: unless-stopped
+  #   command: ["/start-celerybeat"]
+
+  # Nginx
+  # nginx:
+  #   profiles: ["prod"]
+  #   image: nginx:1.27-alpine
+  #   container_name: ${PROJECT_NAME}_nginx
+  #   volumes:
+  #     - static_data:/usr/share/nginx/static:ro
+  #     - media_data:/usr/share/nginx/media:ro
+  #     - ./compose/nginx/conf.d:/etc/nginx/conf.d:ro
+  #   depends_on:
+  #     - web_prod
+  #     - ws_prod
+  #   ports:
+  #     - "8080:80"
+  #     - "8443:443"
+  #   networks:
+  #     - app_network
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: "${PROJECT_NAME:-LSQ}_postgres_data"
+
+  web_static_data:
+    name: "${PROJECT_NAME:-LSQ}_web_static_data"
+
+  web_media_data:
+    name: "${PROJECT_NAME:-LSQ}_web_media_data"
+
+  frontend_node_modules:
+    name: "${PROJECT_NAME:-LSQ}_frontend_node_modules_data"
+
+networks:
+  app_network:
+    name: ${PROJECT_NAME}_network
+  

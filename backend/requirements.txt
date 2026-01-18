@@ -1,0 +1,10 @@
+Django==5.0.1
+django-celery-beat==2.8.1
+django-celery-results==2.5.1
+celery==5.5.3
+psycopg2-binary==2.9.9
+celery==5.5.3
+python-decouple==3.8
+django-celery-beat==2.8.1
+django-celery-results==2.5.1
+django-cors-headers==4.3.1

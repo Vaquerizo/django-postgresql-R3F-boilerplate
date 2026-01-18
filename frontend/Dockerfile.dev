@@ -1,0 +1,18 @@
+FROM node:20.11.1-bullseye-slim
+
+WORKDIR /app
+
+# Copiamos manifests
+COPY package.json package-lock.json ./
+
+# Instalación determinista
+RUN npm ci
+
+# Copiamos el resto del código
+COPY . .
+
+# Puerto por defecto de Vite
+EXPOSE 5173
+
+# Arranque en modo desarrollo
+CMD ["npm", "run", "dev", "--", "--host"]

@@ -32,7 +32,6 @@ frontend/dist/
 frontend/build/
 
 # IDEs
-.vscode/
 .idea/
 **/*.swp
 **/*.swo
